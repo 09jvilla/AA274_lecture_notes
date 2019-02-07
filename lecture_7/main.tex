@@ -58,7 +58,14 @@
 \lecture{7}{Image Processing, Feature Detection and Description}{}
 
 \section{Introduction}
-This lecture discusses several techniques used to extract information from images. The objective is to learn how to represent images and infer visual content from them by focusing on the three key steps of the image processing pipeline: filtering images, feature detection, and feature description.
+Once an autonomous system is able to collect visual information from its surroundings, it must perform a series of operations to develop a representation of the structure and surroundings captured in said visual input. In this lecture, several key steps will be outlined which contribute to the extraction of information from images. This lecture will describe some of the most common steps of the image processing pipeline, including filtering, differentiation, feature detection, and feature description. The core learning objectives of this lecture are as follows:
+
+\begin{itemize}
+    \item Articulate motivation and key concepts of image filtering, and describe several techniques and mathematical operations used to filter and pre-process images;
+    \item Define the concept of image differentiation for a two-dimensional function representation of an image, and describe the central difference method as well as alternatives (e.g. masks);
+    \item Develop the notion of detectors as applied to image feature extraction, and describe two illustrative examples in the form of corner and edge detection;
+    \item Define various alternatives of image feature descriptors and their applications in object detection and matching. 
+\end{itemize}
 
 While images are represented as a collection of pixel values, this raw data is not very useful to computers without image processing and feature detection.  Our aim is to detect local features, such as corners and edges, in order to identify similarities between images, identify 3D objects, and track objects between frames.
 
