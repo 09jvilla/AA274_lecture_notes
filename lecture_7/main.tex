@@ -4,6 +4,7 @@
 \usepackage[sc]{mathpazo}
 \renewcommand{\sfdefault}{kurier}
 
+\usepackage{url,hyperref}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
@@ -63,9 +64,11 @@ This lecture discusses several techniques used to extract information from image
 While images are represented as a collection of pixel values, this raw data is not very useful to computers without image processing and feature detection.  Our aim is to detect local features, such as corners and edges, in order to identify similarities between images, identify 3D objects, and track objects between frames.
 
 \section{Image Filtering}
-We start by considering an image as a function $I$: $[a,b]\times[c,d] \rightarrow [0,L]$, where $I(x,y)$ represents the grayscale pixel intensity at $(x,y)$. Assuming we have a two-dimensional grayscale image, the image is represented as a two-dimensional matrix with $r$ rows and $c$ columns. Each entry is equal to the discretized brightness level; often we use 256 levels, where 0 corresponds to black and 255 to white. For a color image, each entry in the matrix would be a vector function with three components, one each for the red, green, and blue color channels.
+We start by considering an image as a function $I$: $[a,b]\times[c,d] \rightarrow [0,L]$, where $I(x,y)$ represents the grayscale pixel intensity at $(x,y)$ for $a\leq x \leq b$ and $c \leq y \leq d$. Assuming we have a two-dimensional grayscale image, the image is represented as a two-dimensional matrix with $r$ rows and $c$ columns. Each entry is equal to the discretized brightness level; often we use 256 levels, where 0 corresponds to black and 255 to white. (Note that 256 is chosen because it corresponds to the number of levels that can be represented in a single byte.) For a color image, each entry in the matrix would be a vector function with three components, one each for the red, green, and blue color channels.
 
-Image filtering is the process of accepting and rejecting certain frequency components. Image filters can be implemented in one of two ways: in the frequency domain or in the spatial domain. In this class we will mostly focus on filters in the spatial domain.
+Image filtering is the process of accepting and rejecting certain frequency components in an image. These filters can be implemented in one of two ways: (1) in the frequency domain or (2) in the spatial domain. In this class we will primarily focus on filters in the spatial domain.
+
+Open CV implements a number of image filtering algorithms. Read more about them \href{https://docs.opencv.org/3.0-beta/modules/imgproc/doc/filtering.html}{\textbf{here.}}
 
 \subsection{Spatial Filters}
 A spatial filter consists of:
@@ -78,13 +81,23 @@ Spatial filters can be linear or non-linear. In this class, we will focus on lin
 \begin{equation}
   \label{linear}
   \begin{aligned}
-  	I'(x,y) = F \circ I = \sum_{i=-n}^n \sum_{j=-m}^m F(i,j)I(x+i,y+j)\\
+    I'(x,y) = F \circ I = \sum_{i=-n}^n \sum_{j=-m}^m F(i,j)I(x+i,y+j)\\
   \end{aligned}
 \end{equation}
 
-In equation \ref{linear}, $I'$ represents the filtered image, $F$ represents the filter mask (sometimes called the kernel or window), and $I$ represents the original image. The filter mask $F$ is of size $(2N + 1)\times(2M + 1)$), where each entry represents the weighting of a particular neighbor pixel from the original image.
+In equation \ref{linear}, $I'$ represents the filtered image, $F$ represents the filter mask (sometimes called the kernel or window), and $I$ represents the original image. The filter mask $F$ is of size $(2N + 1)\times(2M + 1)$, where each entry represents the weighting of a particular neighbor pixel from the original image.
 
-We apply this filter mask to every pixel $(x,y)$ by multiplying each value of intensity in the neighborhood of $(x,y)$ by a certain weight $F(i,j)$ in order to get to the filtered image $I'$. This procedure is referred to as a \textit{correlation} with the kernel $F$.
+We apply this filter mask to every pixel $(x,y)$ by multiplying each intensity value in the neighborhood of $(x,y)$ by a certain weight $F(i,j)$ in order to get to the filtered image $I'$. This procedure is referred to as a \textit{correlation} with the kernel $F$, and is illustrated in figure \ref{correlation}. 
+
+As we apply this filter, we have to decide what to do at the boundaries of our image. There are a number of options, including padding the image, cropping it, extending it, or wrapping it. However, as images are generally quite large, the exact treatment chosen for the edges does not vary the final result significantly.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=.8]{filter.jpg}
+    \caption{Correlation of initial image with a kernel to produce a filtered image}
+    \label{correlation}
+\end{figure}
+
 
 \subsubsection{Moving Average}
 As an example of a linear spatial filter, the moving average filter returns the average of the pixels in the mask. It achieves a smoothing effect by removing sharp features. For example, for a \textit{normalized} $3\times3$ mask,
@@ -96,21 +109,22 @@ F = \frac{1}{9}
 1 & 1 & 1
 \end{bmatrix}
 \]
-This filter is commonly used to reduce noise and smooth/blur an image, as seen in figure 7.1.
-
+This filter is commonly used to reduce noise and smooth or blur an image, as seen in figure \ref{movag}. The \textif{normalization} is done so that the overall brightness of the image remains constant. 
 \begin{figure}[h]
-	\centering
-	\includegraphics[scale=.4]{blur.png}
+  \centering
+  \includegraphics[scale=.4]{blur.png}
     \caption{Example of a moving average filter}
-    \label{noisy}
+    \label{movag}
 \end{figure}
 
+Read more about the OpenCV implementation of this  \href{https://docs.opencv.org/3.1.0/d4/d86/group__imgproc__filter.html#ga8c45db9afe636703801b0b2e440fce37}{\textbf{here}.} 
+
 \subsubsection{Gaussian Smoothing}
-Another linear spatial filter, the Gaussian filter, is often preferred over a simple moving average filter because the Gaussian filter gives higher weights to pixels closer to the center of the filter and lower weights to those pixels along the edge. The Gaussian smoothing function is given in equation \ref{gaussian} below.
+Another linear spatial filter, the Gaussian filter, is often preferred over a simple moving average filter because it gives higher weights to pixels closer to the center of the filter and lower weights to those along the edge. The Gaussian smoothing function with variance $\sigma^2$ is given in equation \ref{gaussian} below.
 \begin{equation}
   \label{gaussian}
   \begin{aligned}
-  	G_\sigma(x,y) = \frac{1}{2\pi\sigma^2} \exp \bigg(-\frac{x^2 + y^2}{2\sigma^2} \bigg)\\
+    G_\sigma(x,y) = \frac{1}{2\pi\sigma^2} \exp \bigg(-\frac{x^2 + y^2}{2\sigma^2} \bigg)\\
   \end{aligned}
 \end{equation}
 The function is sampled about its center to obtain the mask. For example, for a normalized $3\times3$ mask with $\sigma$ = 0.85,
@@ -123,20 +137,25 @@ G = \frac{1}{16}
 \end{bmatrix}
 \]
 
+Read more about the OpenCV implementation of this  \href{https://docs.opencv.org/3.1.0/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1}{\textbf{here}.} 
+
 \subsubsection{Convolution}
 Convolution is a linear filter that is similar to correlation, but has reverse image indices. Correlation and convolution are identical when the filter is symmetric. The convolution equation is shown in \ref{convolution}.
 
 \begin{equation}
   \label{convolution}
   \begin{aligned}
-  	I'(x,y) = F * I = \sum_{i=-n}^n \sum_{j=-m}^m F(i,j)I(x-i,y-j)\\
+    I'(x,y) = F * I = \sum_{i=-n}^n \sum_{j=-m}^m F(i,j)I(x-i,y-j)\\
   \end{aligned}
 \end{equation}
 
-Convolution enjoys the associativity property $F*(G*I) = (F*G)*I$. We commonly use this associativity property when smoothing an image and taking the derivative of the resulting image.  We can combine these two operations into one by first convolving the derivative filter with the Gaussian filter, then convolving the resulting filter with the image.  This second approach is advantageous because it is less computationally intensive.
+Convolution is associative, meaning that $F*(G*I) = (F*G)*I$. We commonly use this property when trying to smooth an image and then take the derivative of the result. Instead of doing these sequentially, we can combine the two operations into one by first convolving the derivative filter with our smoothing filter (e.g. a Gaussian filter), then convolving the resulting filter with the image. This second approach is advantageous because it is less computationally intensive.
+
+
+
 
 \subsubsection{Separable Masks}
-A mask is separable if it can be broken down into the convolution of two kernels $F = F_1 * F_2$. If a mask is separable into ``smaller'' masks, then it is often cheaper to apply $F_1$ followed by $F_2$, rather than by $F$ directly. There is a special case where the mask is representable as outer product of two vectors (equivalent to two-dimensional convolution of those two vectors). If the mask is $M\times M$, and the image has size $w\times h$, then the complexity is $O(M^2wh)$ with no separability or $O(2Mwh)$ with separability into the outer product of two vectors.
+A mask is separable if it can be broken down into the convolution of two kernels $F = F_1 * F_2$. If a mask is separable into ``smaller'' masks, then it is often cheaper to apply $F_1$ followed by $F_2$, rather than by $F$ directly. One special case of this is when the mask can be represented as outer product of two vectors (meaning it is equivalent to the 2D convolution of those two vectors). If the mask is of shape $M\times M$, and the input image has size $w\times h$, then the computational complexity of directly performing the convolution is $O(M^2wh)$. However, if one were to separate the mask into its component vectors and convolve these components with the input image, the computational cost would be $O(2Mwh)$, which is linear, not quadratic in $M$. 
 
 The moving average mask can be separated as shown below.
 \[
@@ -160,13 +179,13 @@ The Gaussian mask is also separable because the exponential function can be sepa
 \begin{equation}
 \label{gausmask}
   \begin{aligned}
-  	G_\sigma(x,y) = \frac{1}{2\pi\sigma^2} \exp \bigg(-\frac{x^2 + y^2}{2\sigma^2} \bigg)\\
+    G_\sigma(x,y) = \frac{1}{2\pi\sigma^2} \exp \bigg(-\frac{x^2 + y^2}{2\sigma^2} \bigg)\\
     = \frac{1}{\sqrt{2\pi}\sigma}\exp \bigg(-\frac{x^2}{2\sigma^2}\bigg)\frac{1}{\sqrt{2\pi}\sigma} \exp \bigg(-\frac{y^2}{2\sigma^2}\bigg) \\
     = g_\sigma(x) \cdot g_\sigma(y)
   \end{aligned}
 \end{equation}
 
-Decomposing a mask into its separable components does not alter the results but can drastically affect the computational speed of your code.
+Decomposing a mask into its separable components does not alter the results but can drastically improve the computational speed of your code.
 
 \section{Image Differentiation}
 Taking the derivative of an image is similar to differentiating a function with a two-dimensional domain. On a basic level, the derivative of an image represents changes in pixel intensity in both the vertical and horizontal direction. Because images are discrete functions, the traditional method for differentiating continuous functions can not be used. One popular method to differentiate an image is known as the central difference method; the equations for this method are shown below in equation \ref{cendiff}. These equations find the change in intensity between the neighboring pixels.
@@ -209,13 +228,13 @@ Filtering can be used to find similar features in different images. Two useful e
 \begin{equation}
   \label{SAD}
   \begin{aligned}
-  	SAD = \sum_{i=-n}^n \sum_{j=-m}^m |I_1(x+i,y+j)-I_2(x^\prime+i,y^\prime+j)|\\
+    SAD = \sum_{i=-n}^n \sum_{j=-m}^m |I_1(x+i,y+j)-I_2(x^\prime+i,y^\prime+j)|\\
   \end{aligned}
 \end{equation}
 \begin{equation}
   \label{SSD}
   \begin{aligned}
-	SSD = \sum_{i=-n}^n \sum_{j=-m}^m [I_1(x+i,y+j)-I_2(x^\prime+i,y^\prime+j)]^2
+  SSD = \sum_{i=-n}^n \sum_{j=-m}^m [I_1(x+i,y+j)-I_2(x^\prime+i,y^\prime+j)]^2
   \end{aligned}
 \end{equation}
 
@@ -250,8 +269,8 @@ In this part we will discuss classic edge detection techniques. They involve the
 Let us first explore the 1D case to understand the principle of edge detectors and how they behave under high noise. For example, looking at \ref{noisy}, we see that simply differentiating the signal without performing any sort of filtering will yield a completely useless result, as noise causes random values of the derivative at every point. There is no detection threshold that will allow us to detect edges from this differentiated signal.
 
 \begin{figure}[h]
-	\centering
-	\includegraphics[scale=.4]{noisy_uncorrected.PNG}
+  \centering
+  \includegraphics[scale=.4]{noisy_uncorrected.PNG}
     \caption{Differentiation of a noisy signal}
     \label{noisy}
 \end{figure}
@@ -264,8 +283,8 @@ s'(x)=\frac{d}{dx} * s(x)
 Where $I$ is the original signal, $g_\sigma$ is the Gaussian, and $s'$ is the final mask. The performance of such a procedure may be seen in \ref{gauss}.
 
 \begin{figure}[h]
-	\centering
-	\includegraphics[scale=.4]{gaussian.PNG}
+  \centering
+  \includegraphics[scale=.4]{gaussian.PNG}
     \caption{Edge detection through convolution with Gaussian kernel, followed by differentiation}
     \label{gauss}
 \end{figure}
@@ -277,8 +296,8 @@ s'=\frac{d}{dx} * (g_\sigma * I)=(\frac{d}{dx} * g_\sigma) * I
 Therefore the function $g'_\sigma=\frac{d}{dx} * g_\sigma$ may be used for much faster computation. An illustration of this process may be seen in \ref{ker}.
 
 \begin{figure}[h]
-	\centering
-	\includegraphics[scale=.5]{better_kernel.PNG}
+  \centering
+  \includegraphics[scale=.5]{better_kernel.PNG}
     \caption{Edge detection through convolution with a differentiated Gaussian kernel}
     \label{ker}
 \end{figure}
@@ -286,8 +305,8 @@ Therefore the function $g'_\sigma=\frac{d}{dx} * g_\sigma$ may be used for much 
 Now we might take inspiration from this 1D case to design a 2D edge detector. Let $G_\sigma$ be the two dimensional Gaussian distribution (i.e. $G_\sigma(x,y)=\frac{1}{2\pi\sigma^2}exp\bigg(-\frac{x^2+y^2}{2\sigma^2}\bigg)$). An illustration of this function and its derivative may be found in \ref{2dgauss}.
 
 \begin{figure}[h]
-	\centering
-	\includegraphics[scale=.3]{2d_equivalent.PNG}
+  \centering
+  \includegraphics[scale=.3]{2d_equivalent.PNG}
     \caption{2D Gaussian function}
     \label{2dgauss}
 \end{figure}
@@ -309,8 +328,8 @@ Finally, an application of this method on a picture classically used to demonstr
 \subsubsection{Corner Detector}
 
 \begin{figure}[h]
-	\centering
-	\includegraphics[scale=.32]{application.PNG}
+  \centering
+  \includegraphics[scale=.32]{application.PNG}
     \caption{Classic example of 2D edge detection}
     \label{edge_app}
 \end{figure}
@@ -318,8 +337,8 @@ Finally, an application of this method on a picture classically used to demonstr
 \textbf{Corner}\\
 A corner in an image is defined as an intersection of two or more edges, or as defined by Moravec \cite{Moravec}, a point where there is a large intensity variation in every direction. As shown in Fig. \ref{corner}, for a window which is centered at a pixel in a region of uniform intensity (a ``flat" region), its adjacent windows in all directions will be identical. For a window centered at a pixel on an edge, the adjacent windows will look the same except for the ones in the direction perpendicular to the edge. For a window centered at a pixel on a corner, the adjacent windows in any direction will look different.
 \begin{figure}
-	\centering
-	\includegraphics{corner.JPG}
+  \centering
+  \includegraphics{corner.JPG}
     \caption{a) ``Flat'' region: no change in all directions. b) ``Edge'': no change along the edge direction. c) ``Corner'': significant changes in all directions. \cite{SNS}}
     \label{corner}
 \end{figure}
@@ -374,8 +393,8 @@ R
 \end{equation}
 where $\lambda_1$ and $\lambda_2$ are the eigenvalues of $M$.
 \begin{figure}
-	\centering
-	\includegraphics{harris.JPG}
+  \centering
+  \includegraphics{harris.JPG}
     \caption{a) Visualization of direction of the fastest and slowest change of intensity built from matrix $M$. b) Harris and Stephens' classification of corners and edges \cite{SNS}}
     \label{harris}
 \end{figure}
