@@ -59,16 +59,16 @@
 \lecture{7}{Image Processing, Feature Detection and Description}{}
 
 \section{Introduction}
-Once an autonomous system is able to collect visual information from its surroundings, it must perform a series of operations to develop a representation of the structure and surroundings captured in said visual input. In this lecture, several key steps will be outlined which contribute to the extraction of information from images. This lecture will describe some of the most common steps of the image processing pipeline, including filtering, differentiation, feature detection, and feature description. The core learning objectives of this lecture are as follows:
+Once an autonomous system is able to collect visual information from its surroundings, it must perform a series of operations to develop a representation of the structure and surroundings captured in this raw visual input. This allows the system to interpret its surroundings, and the ability to do so accurately is fundamental to successful execution of downstream autonomous operations such as localization, mapping, and decision-making. In this lecture, several key steps will be outlined which contribute to the extraction of such information from images. This lecture will describe some of the most common steps of the image processing pipeline, including filtering, differentiation, feature detection, and feature description. The core learning objectives of this lecture are as follows:
 
 \begin{itemize}
     \item Articulate motivation and key concepts of image filtering, and describe several techniques and mathematical operations used to filter and pre-process images;
-    \item Define the concept of image differentiation for a two-dimensional function representation of an image, and describe the central difference method as well as alternatives (e.g. masks);
+    \item Define the concept of image differentiation for a two-dimensional function representation of an image, and describe the central difference method as well as several alternatives for performing said differentiation (e.g. masks);
     \item Develop the notion of detectors as applied to image feature extraction, and describe two illustrative examples in the form of corner and edge detection;
     \item Define various alternatives of image feature descriptors and their applications in object detection and matching. 
 \end{itemize}
 
-While images are represented as a collection of pixel values, this raw data is not very useful to computers without image processing and feature detection.  Our aim is to detect local features, such as corners and edges, in order to identify similarities between images, identify 3D objects, and track objects between frames.
+By means of the learning objectives and techniques outlined above, this section will describe a workflow by which raw image data (in the form of pixels and color values) can be transformed into a workable representation of the image. From this representation, local features can be used to make inferences on more complex image properties such as similarity of images, object detection and depth / structure identification, and tracking of objects between frames.
 
 \section{Image Filtering}
 We start by considering an image as a function $I$: $[a,b]\times[c,d] \rightarrow [0,L]$, where $I(x,y)$ represents the grayscale pixel intensity at $(x,y)$ for $a\leq x \leq b$ and $c \leq y \leq d$. Assuming we have a two-dimensional grayscale image, the image is represented as a two-dimensional matrix with $r$ rows and $c$ columns. Each entry is equal to the discretized brightness level; often we use 256 levels, where 0 corresponds to black and 255 to white. (Note that 256 is chosen because it corresponds to the number of levels that can be represented in a single byte.) For a color image, each entry in the matrix would be a vector function with three components, one each for the red, green, and blue color channels.
@@ -429,7 +429,7 @@ SIFT is short for Scale Invariant Feature Transform, invented in 1999 by Lowe \c
 \bibliography{ref}
 
 \subsubsection*{Contributors}
-Winter 2019: [Your Names Here]
+Winter 2019: Jennifer Villa, Thurston Brevett, Kevin Li, Anand Natu
 \\
 Winter 2018: Peggy Wang, Molly Zhang, Michael Thompson, Pierre Lachevre, Cuthbert Sun, Quint Underwood
 
