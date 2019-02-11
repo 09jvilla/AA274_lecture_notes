@@ -200,8 +200,8 @@ Taking the derivative of an image is similar to differentiating a function with 
 \begin{equation}
   \label{cendiff}
   \begin{aligned}
-    \frac{\partial I} {\partial x} &= I(x+1,y) - I(x-1,y)\\
-    \frac{\partial I} {\partial y} &= I(x,y+1) - I(x,y-1)
+    \frac{\partial I} {\partial x} &= \frac{I(x+1,y) - I(x-1,y)}{2}\\
+    \frac{\partial I} {\partial y} &= \frac{I(x,y+1) - I(x,y-1)}{2}
   \end{aligned}
 \end{equation}
 
@@ -224,13 +224,13 @@ S_x =
 \end{bmatrix}
 \]
 
-Sobol masks are similar to the central difference method described above in that both approaches use the intensity of neighboring pixels to find the derivative, but Sobol masks use more neighboring pixels when calculating the derivative.
+Sobel masks are similar to the central difference method described above in that both approaches use the intensity of neighboring pixels to find the derivative, but Sobel masks use more neighboring pixels when calculating the derivative, applying a weighting factor to each pixel. We can see that more weight is given to the pixels directly adjacent to the pixel of interest.
 
-For example, $S_x$ weights the rows above and below the row of interest to calculate the horizontal derivative, and $S_y$ weights the columns above and below the column of interest to find the vertical derivative. In essence, the $S_x$ operator takes the central difference of the the row of interest, as well as the rows above and below below the pixel location, and then takes a weighted average of those central differences to make the differentiation more robust.
+For example, $S_x$ weights the rows above and below the row of interest to calculate the horizontal derivative, and $S_y$ weights the columns to the left and the right of the column of interest to find the vertical derivative. In essence, the $S_x$ operator takes the central difference of the the row of interest, as well as the rows above and below below the pixel location, and then takes a weighted average of those central differences to make the differentiation more robust.
 
 
 \subsection{Similarity Measures}
-Filtering can be used to find similar features in different images. Two useful examples of similarity measures are the sum of absolute differences (SAD) and the sum of squared differences (SSD). The equations for each are given below in (\ref{SAD}) and (\ref{SSD}), respectively.
+Filtering can aksi be used to find similar features in different images. Two useful examples of similarity measures are the sum of absolute differences (SAD) and the sum of squared differences (SSD). The equations for each are given below in (\ref{SAD}) and (\ref{SSD}), respectively.
 
 \begin{equation}
   \label{SAD}
@@ -246,7 +246,7 @@ Filtering can be used to find similar features in different images. Two useful e
 \end{equation}
 
 In these equations, $x$ and $y$ refer to a point in image $I_1$, and $x^\prime$ and $y^\prime$ refer to a point in image $I_2$.
-The width and height of the patch, in pixels, are denoted by $n$ and $m$, respectively. SAD and SSD tend not to be very robust, but they do provide a starting point for comparing image features.
+The width and height of the patch, in pixels, are then $H = 2n+1$ and $W = 2m+1$. SAD and SSD tend not to be very robust, but they do provide a starting point for comparing image features.
 
 
 %\section{Detectors (general)}
