@@ -68,14 +68,14 @@ Once an autonomous system is able to collect visual information from its surroun
     \item Define various alternatives of image feature descriptors and their applications in object detection and matching. 
 \end{itemize}
 
-By means of the learning objectives and techniques outlined above, this section will describe a workflow by which raw image data (in the form of pixels and color values) can be transformed into a workable representation of the image. From this representation, local features can be used to make inferences on more complex image properties such as similarity of images, object detection and depth / structure identification, and tracking of objects between frames.
+By means of the learning objectives and techniques outlined above, this section will describe a workflow by which raw image data (in the form of pixels and color values) can be transformed into a workable representation of the image. From this representation, local features can be used to make inferences on more complex image properties such as similarity of images, object detection, depth / structure identification, and tracking of objects between frames.
 
 \section{Image Filtering}
 We start by considering an image as a function $I$: $[a,b]\times[c,d] \rightarrow [0,L]$, where $I(x,y)$ represents the grayscale pixel intensity at $(x,y)$ for $a\leq x \leq b$ and $c \leq y \leq d$. Assuming we have a two-dimensional grayscale image, the image is represented as a two-dimensional matrix with $r$ rows and $c$ columns. Each entry is equal to the discretized brightness level; often we use 256 levels, where 0 corresponds to black and 255 to white. (Note that 256 is chosen because it corresponds to the number of levels that can be represented in a single byte.) For a color image, each entry in the matrix would be a vector function with three components, one each for the red, green, and blue color channels.
 
 Image filtering is the process of accepting and rejecting certain frequency components in an image. These filters can be implemented in one of two ways: (1) in the frequency domain or (2) in the spatial domain. In this class we will primarily focus on filters in the spatial domain.
 
-Open CV implements a number of image filtering algorithms. Read more about them \href{https://docs.opencv.org/3.0-beta/modules/imgproc/doc/filtering.html}{\textbf{here.}}
+OpenCV implements a number of image filtering algorithms. Read more about them \href{https://docs.opencv.org/3.0-beta/modules/imgproc/doc/filtering.html}{\textbf{here.}}
 
 \subsection{Spatial Filters}
 A spatial filter consists of:
@@ -92,7 +92,7 @@ Spatial filters can be linear or non-linear. In this class, we will focus on lin
   \end{aligned}
 \end{equation}
 
-In equation \ref{linear}, $I'$ represents the filtered image, $F$ represents the filter mask (sometimes called the kernel or window), and $I$ represents the original image. The filter mask $F$ is of size $(2N + 1)\times(2M + 1)$, where each entry represents the weighting of a particular neighbor pixel from the original image.
+In equation \ref{linear}, $I'$ represents the filtered image, $F$ represents the filter mask (sometimes called the kernel or window), and $I$ represents the original image. The filter mask $F$ is of size $(2n+1)\times(2m+1)$, where each entry represents the weighting of a particular neighbor pixel from the original image.
 
 We apply this filter mask to every pixel $(x,y)$ by multiplying each intensity value in the neighborhood of $(x,y)$ by a certain weight $F(i,j)$ in order to get to the filtered image $I'$. This procedure is referred to as a \textit{correlation} with the kernel $F$, and is illustrated in figure \ref{correlation}. 
 
@@ -156,7 +156,7 @@ Convolution is a linear filter that is similar to correlation, but has reverse i
   \end{aligned}
 \end{equation}
 
-Convolution is associative, meaning that $F*(G*I) = (F*G)*I$. We commonly use this property when trying to smooth an image and then take the derivative of the result. Instead of doing these sequentially, we can combine the two operations into one by first convolving the derivative filter with our smoothing filter (e.g. a Gaussian filter), then convolving the resulting filter with the image. This second approach is advantageous because it is less computationally intensive.
+Convolution is associative, meaning that $F*(G*I) = (F*G)*I$. We commonly use this property when trying to smooth an image and then take the derivative of the result to obtain the gradient. Instead of doing these sequentially, we can combine the two operations into one by first convolving the derivative filter with our smoothing filter (e.g. a Gaussian filter), then convolving the resulting filter with the image. This second approach is advantageous because it is less computationally intensive.
 
 
 
@@ -226,11 +226,11 @@ S_x =
 
 Sobel masks are similar to the central difference method described above in that both approaches use the intensity of neighboring pixels to find the derivative, but Sobel masks use more neighboring pixels when calculating the derivative, applying a weighting factor to each pixel. We can see that more weight is given to the pixels directly adjacent to the pixel of interest.
 
-For example, $S_x$ weights the rows above and below the row of interest to calculate the horizontal derivative, and $S_y$ weights the columns to the left and the right of the column of interest to find the vertical derivative. In essence, the $S_x$ operator takes the central difference of the the row of interest, as well as the rows above and below below the pixel location, and then takes a weighted average of those central differences to make the differentiation more robust.
+For example, $S_x$ weights the rows above and below the row of interest to calculate the horizontal derivative, and $S_y$ weights the columns to the left and the right of the column of interest to find the vertical derivative. In essence, the $S_x$ operator takes the central difference of the the row of interest, as well as the rows above and below the pixel location, and then takes a weighted average of those central differences to make the differentiation more robust.
 
 
 \subsection{Similarity Measures}
-Filtering can aksi be used to find similar features in different images. Two useful examples of similarity measures are the sum of absolute differences (SAD) and the sum of squared differences (SSD). The equations for each are given below in (\ref{SAD}) and (\ref{SSD}), respectively.
+Filtering can also be used to find similar features in different images. Two useful examples of similarity measures are the sum of absolute differences (SAD) and the sum of squared differences (SSD). The equations for each are given below in (\ref{SAD}) and (\ref{SSD}), respectively.
 
 \begin{equation}
   \label{SAD}
@@ -258,7 +258,7 @@ The width and height of the patch, in pixels, are then $H = 2n+1$ and $W = 2m+1$
 
 \section{Image Feature Extraction}
 
-A local feature on an image can often also be referred to as an interest point, interest region, or keypoint - it is an image pattern where the intensity, color or texture differs from its immediate neighborhood. Often times, such as in medical image processing or automotive applications, local features have semantic interpretations, such as blobs corresponding to blood cells in medical images or edges corresponding to the lane of the road. There are also some features that do not possess semantic content but their locations can be found consistently and robustly overtime, which is valuable for uses such as feature tracking, camera calibration, 3D reconstruction, image mosaicing and panorama stitching. In some cases, the location of the features does not matter either; for applications such as scene classification, texture analysis, video mining, and image retrieval, only the number of feature matches is important. This section discusses the basic concepts of some local feature extractors (detectors and descriptors), and their desired properties.
+A local feature on an image can often also be referred to as an interest point, interest region, or keypoint - it is an image pattern where the intensity, color or texture differs from its immediate neighborhood. Often times, such as in medical image processing or automotive applications, local features have semantic interpretations, such as blobs corresponding to blood cells in medical images or edges corresponding to the lane of the road. There are also some features that do not possess semantic content but their locations can be found consistently and robustly over time, which is valuable for uses such as feature tracking, camera calibration, 3D reconstruction, image mosaicing and panorama stitching. In some cases, the location of the features does not matter either; for applications such as scene classification, texture analysis, video mining, and image retrieval, only the number of feature matches is important. This section discusses the basic concepts of some local feature extractors (detectors and descriptors), and their desired properties.
 
 \subsection{Detectors}
 Detectors detect local features. The most common detectors are edge detectors, corner detectors and blob detectors.
@@ -271,7 +271,7 @@ Some criteria necessary for robust edge detection include accuracy, localization
 Most edge detection methods rely on two key steps: smoothing and differentiation. Differentiation is performed in both the vertical and horizontal directions to find locations with high intensity gradients in just one of the two directions. However, differentiation alone is vulnerable to false positives due to image noise, which may be gaussian additive noise or otherwise such as salt \& pepper noise (where random pixels jump to either complete white or complete black) \cite{saltnpepper}. In order to lower the noise, many algorithms will smooth the image before differentiating it. The next section explores edge detection further. \\
 
 \textbf{Techniques}\\
-In this part we will discuss classic edge detection techniques. They involve the use of convolution with a Kernel to extract edges. For example, differentiating every point in our signal should only give non zero values (or at least high values) at each edge, allowing us to sort them easily. However we will see that this is not always the case as our signal/image is usually not as smooth as we would like it to be.
+In this part we will discuss classic edge detection techniques. They involve the use of convolution with a kernel to extract edges. For example, differentiating every point in our signal should only give non zero values (or at least high values) at each edge, allowing us to sort them easily. However we will see that this is not always the case as our signal/image is usually not as smooth as we would like it to be.
 
 Let us first explore the 1D case to understand the principle of edge detectors and how they behave under high noise. For example, looking at \ref{noisy}, we see that simply differentiating the signal without performing any sort of filtering will yield a completely useless result, as noise causes random values of the derivative at every point. There is no detection threshold that will allow us to detect edges from this differentiated signal.
 
@@ -350,16 +350,16 @@ A corner in an image is defined as an intersection of two or more edges, or as d
     \label{corner}
 \end{figure}
 
-Moravec's method identifies a corner where the Sum of Squared Difference (SSD) is at its local maxima. The SSD between image patch centered on pixel coordinate $(u,v)$ and the image patch shifted by $(x,y)$ is given by:
+Moravec's method identifies a corner where the Sum of Squared Difference (SSD) is at its local maxima. The SSD between image patch centered on pixel coordinate $(u,v)$ and the image patch offset by $(x,y)$ is given by:
 \begin{equation}
-SSD(x,y) = \sum_u \sum_v ((I(u,v)-I(u+x,v+y))^2
+SSD = \sum_{i=-n}^n \sum_{j=-m}^m [I_1(x+i,y+j)-I_2(x^\prime+i,y^\prime+j)]^2
 \end{equation}
 where $I$ denotes the intensity of a grayscale image. \\
 
-\textbf{Desired properties of corner detectors}\\
-The most important desired properties of corner detectors are repeatability and distinctiveness. Having detectors with ``repeatability'' means that the same features taken at the same scene under different viewpoint and illumination conditions can be found in multiple images, which requires the features to be invariant to geometric and photometric transformations. Having detectors with ``distinctiveness" means the information carried by the patch surrounding the keypoints are highly distinctive, therefore a reliable correspondence can be established, and feature points can be distinguished and matched. Good repeatability and distinctiveness are both desirable for point matching and application such as panorama stitching and 3D reconstruction.
+\textbf{Desired Properties of Corner Detectors}\\
+The most important desired properties of corner detectors are repeatability and distinctiveness. Having detectors with ``repeatability'' means that the same features taken at the same scene under different viewpoint and illumination conditions can be found in multiple images, which requires the features to be invariant to geometric and photometric transformations. Having detectors with ``distinctiveness" means the information carried by the patch surrounding the keypoints are highly distinctive, therefore a reliable correspondence can be established, and feature points can be distinguished and matched. Good repeatability and distinctiveness are both desirable for point matching and applications such as panorama stitching and 3D reconstruction.
 
-\textbf{Harris corner detector}\\
+\textbf{Harris Corner Detector}\\
 Instead of the shifting windows, the Harris corner detector \cite{Harris} uses partial derivatives of the SSD which improves upon Moravec's corner detector.
 
 Harris and Stephens first approximated $I(u+x,v+y)$ with a first-order Taylor expansion; the SSD can be expressed as follows:
@@ -417,7 +417,7 @@ The Harris corner detector is invariant to 2D rotations, as the eigenvalues of t
 \subsection{Descriptors}
 Descriptors describe keypoints (local features) to be compared across images or used for object detection or matching. Like the detectors, it is also desirable for descriptors to be repeatable and distinct. A naive descriptor is an $n\times m$ window of pixel intensities centered at a keypoint, which can be normalized to be illumination invariant; however, it is not invariant to pose and scale, and is poorly distinctive.
 \subsubsection{SIFT}
-SIFT is short for Scale Invariant Feature Transform, invented in 1999 by Lowe \cite{SIFT}. SIFT not only incorporates all the properties of the scale-affine-invariant Harris, but is also extremely distinctive and robust to image noise, small illumination variations, and viewpoint changes. It is known for its high repeatability and high matching rate even in very challenging conditions, and it has lots of applications in object, gesture and face recognition, robotic perception and 3D modeling. SIFT features are essentially local distributions of the image gradient around keypoints with highly informative content. The following briefly introduces the main steps of the SIFT algorithm. More details can be found in \cite{SIFT}.
+SIFT is short for Scale Invariant Feature Transform, invented in 1999 by Lowe \cite{SIFT}. SIFT not only incorporates all the properties of the scale-affine-invariant Harris, but is also extremely distinctive and robust to image noise, small illumination variations, and viewpoint changes. It is known for its high repeatability and high matching rate even in very challenging conditions, and it has many applications in object, gesture and face recognition, robotic perception and 3D modeling. SIFT features are essentially local distributions of the image gradient around keypoints with highly informative content. The following briefly introduces the main steps of the SIFT algorithm. More details can be found in \cite{SIFT}.
 \begin{enumerate}
 \item Scale-space extrema detection: Keypoints are detected by searching for stable features across the scale space (a continuous function of scale). The stable keypoint locations are identified by computing the difference of Gaussian (DoG) of two nearby scale space image produced from repeatedly convolving Gaussians with the initial image, and selecting the local extrema where the sample point is the largest or smallest among its eight neighbors in the current image and nine neighbors in the scale above and below.
 \item Keypoint localization: The keypoint localization step fits the nearby data for location, orientation, scale and ratio of principal curvatures around keypoints candidates, and rejects the ones that are below some contrast threshold or poorly localized along an edge.
